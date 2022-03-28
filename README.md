@@ -2,6 +2,17 @@
 
 Composes frames from a group of given images, and generates a video out of them
 
+## External dependencies
+
+### ffmpeg
+
+- MacOS:
+  Run `brew install ffmpeg`
+- Ubuntu
+  Run `sudo apt-get install ffmpeg`
+- Windows
+  Run `?`
+
 ## Run
 
 ```

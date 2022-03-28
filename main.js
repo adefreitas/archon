@@ -38,16 +38,20 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var fs = require("fs");
 var sharp = require("sharp");
+var ffmpeg = require("fluent-ffmpeg");
+var INPUT_DIR = "assets";
+var TEMP_DIR = "temp";
+var OUTPUT_DIR = "generated";
 function main() {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    console.log("Merging started 🏎");
+                    console.log("Hello there! Starting processing");
                     return [4 /*yield*/, generateFrames()];
                 case 1:
                     _a.sent();
-                    console.log("Merging finished 🏁!");
+                    generateVideo();
                     return [2 /*return*/];
             }
         });
@@ -55,20 +59,19 @@ function main() {
 }
 function generateFrames() {
     return __awaiter(this, void 0, void 0, function () {
-        var assetDir, outputDir, backgroundPath, i, leftImagePath, rightImagePath, outputFramePath, leftImage, rightImage;
+        var backgroundPath, i, leftImagePath, rightImagePath, outputFramePath, leftImage, rightImage;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    assetDir = "assets";
-                    outputDir = "generated";
-                    backgroundPath = "./".concat(assetDir, "/background.png");
+                    console.log("Frame generation started 🏎");
+                    backgroundPath = "./".concat(INPUT_DIR, "/background.png");
                     i = 1;
                     _a.label = 1;
                 case 1:
                     if (!(i < 5)) return [3 /*break*/, 4];
-                    leftImagePath = "./".concat(assetDir, "/left").concat(i, ".png");
-                    rightImagePath = "./".concat(assetDir, "/right").concat(i, ".png");
-                    outputFramePath = "./".concat(outputDir, "/output").concat(i, ".png");
+                    leftImagePath = "./".concat(INPUT_DIR, "/left").concat(i, ".png");
+                    rightImagePath = "./".concat(INPUT_DIR, "/right").concat(i, ".png");
+                    outputFramePath = "./".concat(TEMP_DIR, "/output").concat(i, ".png");
                     leftImage = fs.readFileSync(leftImagePath);
                     rightImage = fs.readFileSync(rightImagePath);
                     return [4 /*yield*/, sharp(backgroundPath)
@@ -83,8 +86,24 @@ function generateFrames() {
                 case 3:
                     i++;
                     return [3 /*break*/, 1];
-                case 4: return [2 /*return*/];
+                case 4:
+                    console.log("Frame generation finished 🏁!");
+                    return [2 /*return*/];
             }
+        });
+    });
+}
+function generateVideo() {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            console.log("Video generation started 🏎");
+            ffmpeg()
+                .input("./".concat(TEMP_DIR, "/output%01d.png"))
+                .loop(5)
+                .fps(5)
+                .on('end', function () { console.log("Video generation finished 🏁!"); })
+                .save("./".concat(OUTPUT_DIR, "/output.webm"));
+            return [2 /*return*/];
         });
     });
 }
