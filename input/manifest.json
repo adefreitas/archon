@@ -1,0 +1,139 @@
+[
+  {
+    "attribute": "background",
+    "multiple": true,
+    "categories": [
+      {
+        "category": "celestial",
+        "multiple": true,
+        "rarity": 0.35,
+        "files": [
+          {
+            "file": "galaxy-blue",
+            "rarity": 0.25
+          },
+          {
+            "file": "galaxy-large-green",
+            "rarity": 0.25
+          }
+        ]
+      },
+      {
+        "category": "planets",
+        "multiple": false,
+        "rarity": 0.5,
+        "files": [
+          {
+            "file": "asteroid-belt",
+            "rarity": 1
+          },
+          {
+            "file": "asteroid-belt-alt",
+            "rarity": 1
+          }
+        ]
+      },
+      {
+        "category": "anomalies",
+        "multiple": false,
+        "rarity": 0.15,
+        "files": [
+          {
+            "file": "monolith",
+            "rarity": 0.25
+          },
+          {
+            "file": "wormhole-blue",
+            "rarity": 1
+          }
+        ]
+      },
+      {
+        "category": "ships",
+        "multiple": false,
+        "rarity": 0.35,
+        "files": [
+          {
+            "file": "ships-battle",
+            "rarity": 1
+          },
+          {
+            "file": "ships-battle-alt",
+            "rarity": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "attribute": "logo",
+    "multiple": true,
+    "categories": [
+      {
+        "category": "logo-1",
+        "multiple": false,
+        "rarity": 0.5,
+        "files": [
+          {
+            "file": "logo-1-leaf",
+            "rarity": 0.1
+          },
+          {
+            "file": "panel-1-thunder",
+            "rarity": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "attribute": "left-arm",
+    "multiple": false,
+    "categories": [
+      {
+        "category": "leftarm",
+        "multiple": false,
+        "rarity": 1,
+        "files": [
+          {
+            "file": "leftarm-black",
+            "rarity": 0.25
+          },
+          {
+            "file": "leftarm-blue",
+            "rarity": 0.25
+          },
+          {
+            "file": "leftarm-gold",
+            "rarity": 0.1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "attribute": "right-arm",
+    "multiple": false,
+    "categories": [
+      {
+        "category": "rightarm",
+        "multiple": false,
+        "rarity": 1,
+        "files": [
+          {
+            "file": "rightarm-black",
+            "rarity": 0.25
+          },
+          {
+            "file": "rightarm-blue",
+            "rarity": 0.25
+          },
+          {
+            "file": "rightarm-gold",
+            "rarity": 0.1
+          }
+        ]
+      }
+    ]
+  }
+]
