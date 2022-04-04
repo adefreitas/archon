@@ -36,14 +36,20 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var asset_1 = require("./generators/asset");
-function main() {
+exports.generateAssets = void 0;
+var frames_1 = require("./frames");
+var video_1 = require("./video");
+function generateAssets() {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            console.log("Hello there! Starting processing");
-            (0, asset_1.generateAssets)();
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, (0, frames_1.generateFrames)()];
+                case 1:
+                    _a.sent();
+                    (0, video_1.generateVideo)();
+                    return [2 /*return*/];
+            }
         });
     });
 }
-main();
+exports.generateAssets = generateAssets;

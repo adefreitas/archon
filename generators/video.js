@@ -36,14 +36,21 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var asset_1 = require("./generators/asset");
-function main() {
+exports.generateVideo = void 0;
+var ffmpeg = require("fluent-ffmpeg");
+var directories_1 = require("../constants/directories");
+function generateVideo() {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            console.log("Hello there! Starting processing");
-            (0, asset_1.generateAssets)();
+            console.log("Video generation started 🏎");
+            ffmpeg()
+                .input("./".concat(directories_1.TEMP_DIR, "/output%01d.png"))
+                .loop(5)
+                .fps(5)
+                .on('end', function () { console.log("Video generation finished 🏁!"); })
+                .save("./".concat(directories_1.OUTPUT_DIR, "/output.webm"));
             return [2 /*return*/];
         });
     });
 }
-main();
+exports.generateVideo = generateVideo;

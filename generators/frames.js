@@ -36,14 +36,44 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var asset_1 = require("./generators/asset");
-function main() {
+exports.generateFrames = void 0;
+var fs = require("fs");
+var sharp = require("sharp");
+var directories_1 = require("../constants/directories");
+function generateFrames() {
     return __awaiter(this, void 0, void 0, function () {
+        var backgroundPath, i, leftImagePath, rightImagePath, outputFramePath, leftImage, rightImage;
         return __generator(this, function (_a) {
-            console.log("Hello there! Starting processing");
-            (0, asset_1.generateAssets)();
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0:
+                    console.log("Frame generation started 🏎");
+                    backgroundPath = "./".concat(directories_1.INPUT_DIR, "/background.png");
+                    i = 1;
+                    _a.label = 1;
+                case 1:
+                    if (!(i < 5)) return [3 /*break*/, 4];
+                    leftImagePath = "./".concat(directories_1.INPUT_DIR, "/left").concat(i, ".png");
+                    rightImagePath = "./".concat(directories_1.INPUT_DIR, "/right").concat(i, ".png");
+                    outputFramePath = "./".concat(directories_1.TEMP_DIR, "/output").concat(i, ".png");
+                    leftImage = fs.readFileSync(leftImagePath);
+                    rightImage = fs.readFileSync(rightImagePath);
+                    return [4 /*yield*/, sharp(backgroundPath)
+                            .composite([
+                            { input: leftImage },
+                            { input: rightImage },
+                        ])
+                            .toFile(outputFramePath)];
+                case 2:
+                    _a.sent();
+                    _a.label = 3;
+                case 3:
+                    i++;
+                    return [3 /*break*/, 1];
+                case 4:
+                    console.log("Frame generation finished 🏁!");
+                    return [2 /*return*/];
+            }
         });
     });
 }
-main();
+exports.generateFrames = generateFrames;
