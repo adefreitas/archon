@@ -47,14 +47,14 @@ function generateFrames() {
             switch (_a.label) {
                 case 0:
                     console.log("Frame generation started 🏎");
-                    backgroundPath = "./".concat(directories_1.INPUT_DIR, "/background.png");
+                    backgroundPath = "./".concat(directories_1.INPUT_ASSETS_DIR, "/background.png");
                     i = 1;
                     _a.label = 1;
                 case 1:
                     if (!(i < 5)) return [3 /*break*/, 4];
-                    leftImagePath = "./".concat(directories_1.INPUT_DIR, "/left").concat(i, ".png");
-                    rightImagePath = "./".concat(directories_1.INPUT_DIR, "/right").concat(i, ".png");
-                    outputFramePath = "./".concat(directories_1.TEMP_DIR, "/output").concat(i, ".png");
+                    leftImagePath = "./".concat(directories_1.INPUT_ASSETS_DIR, "/left").concat(i, ".png");
+                    rightImagePath = "./".concat(directories_1.INPUT_ASSETS_DIR, "/right").concat(i, ".png");
+                    outputFramePath = "./".concat(directories_1.OUTPUT_FRAMES_DIR, "/output").concat(i, ".png");
                     leftImage = fs.readFileSync(leftImagePath);
                     rightImage = fs.readFileSync(rightImagePath);
                     return [4 /*yield*/, sharp(backgroundPath)

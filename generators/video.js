@@ -44,11 +44,11 @@ function generateVideo() {
         return __generator(this, function (_a) {
             console.log("Video generation started 🏎");
             ffmpeg()
-                .input("./".concat(directories_1.TEMP_DIR, "/output%01d.png"))
+                .input("./".concat(directories_1.OUTPUT_FRAMES_DIR, "/output%01d.png"))
                 .loop(5)
                 .fps(5)
                 .on('end', function () { console.log("Video generation finished 🏁!"); })
-                .save("./".concat(directories_1.OUTPUT_DIR, "/output.webm"));
+                .save("./".concat(directories_1.OUTPUT_VIDEO_DIR, "/output.webm"));
             return [2 /*return*/];
         });
     });
