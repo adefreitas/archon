@@ -33,3 +33,7 @@ export function weightedRandom<T>(items: Array<T>, weights: Array<number>): T {
   const rand = Math.random() * cumulative[cumulative.length - 1];
   return items[pick(rand, cumulative)];
 }
+
+export function chance(prob: number) {
+  return Math.random() < prob;
+}
