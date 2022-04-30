@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import * as sharp from "sharp";
+import sharp from "sharp";
 import { INPUT_ATTRIBUTES_DIR, OUTPUT_FRAMES_DIR } from "../constants/directories";
 import { Manifest } from "../utils/manifest";
 

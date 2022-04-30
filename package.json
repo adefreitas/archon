@@ -12,10 +12,12 @@
   "dependencies": {
     "@types/sharp": "^0.30.1",
     "fluent-ffmpeg": "^2.1.2",
-    "sharp": "^0.30.3"
+    "sharp": "^0.30.3",
+    "tiny-async-pool": "^2.0.1"
   },
   "devDependencies": {
     "@types/node": "^17.0.23",
+    "@types/tiny-async-pool": "^2.0.0",
     "typescript": "^4.6.3"
   }
 }
