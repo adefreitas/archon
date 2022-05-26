@@ -1,7 +1,6 @@
 import * as fs from "fs";
 import sharp from "sharp";
 import { INPUT_ATTRIBUTES_DIR, OUTPUT_FRAMES_DIR } from "../constants/directories";
-import { Manifest } from "../utils/manifest";
 
 export async function generateFrames() {
   console.log("Frame generation started 🏎");

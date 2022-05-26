@@ -1,20 +1,41 @@
 import * as fs from "fs";
 import asyncPool from "tiny-async-pool";
 import sharp from "sharp";
-import { INPUT_ATTRIBUTES_DIR, INPUT_DIR, INPUT_MANIFEST_DIR, OUTPUT_DIR, OUTPUT_FRAMES_DIR, OUTPUT_METADATA_DIR, OUTPUT_VIDEO_DIR } from "../constants/directories";
+import {
+  INPUT_ATTRIBUTES_DIR,
+  INPUT_DIR,
+  INPUT_MANIFEST_DIR,
+  OUTPUT_DIR,
+  OUTPUT_FRAMES_DIR,
+  OUTPUT_METADATA_DIR,
+  OUTPUT_VIDEO_DIR,
+} from "../constants/directories";
 import { generateVideo } from "../generators/video";
 import { chance, weightedRandom } from "./random";
 
-export interface Manifest {
-  attribute: string;
-  // Currently does not work
-  multiple: boolean;
-  categories: Array<Category>
+export enum Attribute {
+  HANDS = 'Hands',
+  AURA="Aura",  
+  WATCHERS="Watchers",
+  STAIRS="Stairs",
+  ARCHES="Arches",
+  GEMS="Gems",
+  BLIPS="Blips",
+}
+
+export type Manifest = Array<AttributeManifest>;
+
+export type NamedManifest = {
+  [key in Attribute]?: AttributeManifest;
+}
+
+export interface AttributeManifest {
+  attribute: Attribute;
+  categories: Array<Category>;
 }
 
 export interface Category {
   category: string;
-  multiple: true;
   rarity: number;
   files: Array<File>;
 }
@@ -27,7 +48,6 @@ export interface File {
 export type AttributeFrames = Array<Array<string>>;
 
 export interface Frames {
-
   aura: AttributeFrames;
   watchers: AttributeFrames;
   stairs: AttributeFrames;
@@ -37,179 +57,223 @@ export interface Frames {
   hands: AttributeFrames;
 }
 
-export function readManifest(): Array<Manifest> {
+export function readManifest(): NamedManifest {
   const manifestPath = `${INPUT_MANIFEST_DIR}/manifest.json`;
-  const manifest = JSON.parse(fs.readFileSync(manifestPath).toString()) as Array<Manifest>;
-  return manifest;
+  const manifest = JSON.parse(
+    fs.readFileSync(manifestPath).toString()
+  ) as Manifest;
+
+  const namedManifest: NamedManifest = {}
+
+  for(let i = 0; i < manifest.length; i++) {
+    namedManifest[manifest[i].attribute] = manifest[i];
+  }
+  return namedManifest;
 }
 
-export function getRandomCategories(manifest: Manifest): Array<Category> {
-  let categories = manifest.categories.slice(0, manifest.categories.length);
-
-  if (!manifest.multiple) {
-    return [weightedRandom(
-      categories, categories.map((category) => category.rarity),
-    )]
-
-  }
-  // TODO: fix if manifest.multiple == true, chaos ensues at the moment
-  return categories
+export function getRandomCategories(manifest: AttributeManifest): Array<Category> {
+  return [
+    weightedRandom(
+      manifest.categories,
+      manifest.categories.map((category) => category.rarity)
+    ),
+  ];;
 }
 
 export function getFilesInCategory(category: Category) {
-  let files = category.files.slice(0, category.files.length);
-
-  if (category.multiple) {
-    files = files.filter((file) => chance(file.rarity * category.rarity))
-  } else {
-    if (!chance(category.rarity)) {
-      return []
-    }
-    files = [weightedRandom(files, files.map((file) => file.rarity))];
+  if (!chance(category.rarity)) {
+    return [];
   }
-
-  return files
+  return [
+    weightedRandom(
+      category.files,
+      category.files.map((file) => file.rarity)
+    ),
+  ];
 }
 
-export function getFiles(attribute: string, category: string, file: string): Array<string> {
+export function getFiles(
+  attribute: string,
+  category: string,
+  file: string
+): Array<string> {
   const images: Array<string> = [];
 
   for (let i = 1; i < 200; i++) {
     // Generate file paths
-    images.push(`${INPUT_ATTRIBUTES_DIR}/${category}/${file}/${file}_${i.toString().padStart(5, "0")}.png`);
+    images.push(
+      `${INPUT_ATTRIBUTES_DIR}/${category}/${file}/${file}_${i
+        .toString()
+        .padStart(5, "0")}.png`
+    );
   }
   return images;
 }
 
-export function get(manifest: Manifest): [Array<Array<string>>, {}] {
+export function get(manifest: AttributeManifest): [Array<Array<string>>, {}] {
   const categories = getRandomCategories(manifest);
   const fileList = categories.map((category) => getFilesInCategory(category));
-  const files = fileList.map((file) => {
-    return file.map((f) => {
-      return getFiles(manifest.attribute, categories[0].category, f.file)
+  const files = fileList
+    .map((file) => {
+      return file.map((f) => {
+        return getFiles(manifest.attribute, categories[0].category, f.file);
+      });
     })
-  }).flat();
+    .flat();
 
-  const data = {}
-  fileList.filter((file) => file.length > 0).forEach((file) => {
-    const name = file[0].file;
-    const values = file.map((file) => file.file)
-    data[categories[0].category] = values
+  const data = {};
+  const filesWithActualFiles = fileList.filter((file) => file.length > 0);
+  for (let i = 0; i < filesWithActualFiles.length; i++) {
+    const name = filesWithActualFiles[i][0].file;
+    const values = filesWithActualFiles[i].map((file) => file.file);
+    data[categories[0].category] = values;
+  }
 
-  })
-
-  return [files, data]
+  return [files, data];
 }
 
-function getAtributes(manifests: Array<Manifest>): { frames: Frames, data: any } {
-  let data = {}
+function getAtributes(namedManifest: NamedManifest): {
+  frames: Frames;
+  data: any;
+} {
+  let data = {};
 
-  const [aura, d1] = get(manifests.find(manifest => manifest.attribute === "Aura"))
+  const [aura, d1] = get(
+    namedManifest[Attribute.AURA]
+  );
   data = {
     ...data,
     ...d1,
   };
 
-  const [watchers, d2] = get(manifests.find(manifest => manifest.attribute === "Watchers"))
+  const [watchers, d2] = get(
+    namedManifest[Attribute.WATCHERS]
+  );
   data = {
     ...data,
     ...d2,
   };
-  const [stairs, d3] = get(manifests.find(manifest => manifest.attribute === "Stairs"))
+  const [stairs, d3] = get(
+    namedManifest[Attribute.STAIRS]
+  );
   data = {
     ...data,
     ...d3,
   };
 
-  const [arches, d4] = get(manifests.find(manifest => manifest.attribute === "Arches"))
+  const [arches, d4] = get(
+    namedManifest[Attribute.ARCHES]
+  );
   data = {
     ...data,
     ...d4,
   };
 
-  const [gems, d5] = get(manifests.find(manifest => manifest.attribute === "Gems"))
+  const [gems, d5] = get(
+    namedManifest[Attribute.GEMS]
+  );
   data = {
     ...data,
     ...d5,
   };
-  const [blips, d6] = get(manifests.find(manifest => manifest.attribute === "Blips"))
+  const [blips, d6] = get(
+    namedManifest[Attribute.BLIPS]
+  );
   data = {
     ...data,
     ...d6,
   };
 
-  const [hands, d7] = get(manifests.find(manifest => manifest.attribute === "Hands"))
+  const [hands, d7] = get(
+    namedManifest[Attribute.HANDS]
+  );
   data = {
     ...data,
     ...d7,
   };
 
-
   return {
-    frames: { aura, watchers, stairs, arches, gems, blips, hands  }, data
-  }
+    frames: { aura, watchers, stairs, arches, gems, blips, hands },
+    data,
+  };
 }
 
-async function extractFrame(frameConfig: Array<string>, frameNumber: number, inputs: Array<Buffer>) {
-    if(frameConfig[frameNumber]) {
-      const path = await fs.promises.readFile(frameConfig[frameNumber]);
-      inputs.push(path)
-      return Promise.resolve();
-    }
+async function extractFrame(
+  frameConfig: Array<string>,
+  frameNumber: number,
+  inputs: Array<Buffer>
+) {
+  if (frameConfig[frameNumber]) {
+    const path = await fs.promises.readFile(frameConfig[frameNumber]);
+    inputs.push(path);
     return Promise.resolve();
-};
+  }
+  return Promise.resolve();
+}
 
 export async function combineAttributes(frames: Frames, prefix: number) {
-  await Promise.all(Array.from(Array(200).keys()).map(async(i) => {
-    const inputs: Array<Buffer> = [];
+  await Promise.all(
+    Array.from(Array(200).keys()).map(async (i) => {
+      const inputs: Array<Buffer> = [];
 
-    const attributes = Object.keys(frames);
-    const promises = attributes.flatMap((attribute) => {
-      const attributeFrames: AttributeFrames = frames[attribute];
-      const frameExtractionPromise = attributeFrames.map((frame) => {
-        return extractFrame(frame, i, inputs)
+      const attributes = Object.keys(frames);
+      const promises = attributes.flatMap((attribute) => {
+        const attributeFrames: AttributeFrames = frames[attribute];
+        const frameExtractionPromise = attributeFrames.map((frame) => {
+          return extractFrame(frame, i, inputs);
+        });
+        return frameExtractionPromise;
       });
-      return frameExtractionPromise;
-    });
 
-    await Promise.all(promises);
-  
-    await sharp(`${INPUT_DIR}/background.png`)
-      .composite(inputs.map((input) => ({ input })))
-      .toFormat('png', {compressionLevel: 9})
-      .toFile(`${OUTPUT_FRAMES_DIR}/raw/${prefix}/${prefix}_${i}.png`)
-      .catch(e => console.log(e))
-      
-  }));
+      await Promise.all(promises);
+
+      await sharp(`${INPUT_DIR}/background.png`)
+        .composite(inputs.map((input) => ({ input })))
+        .toFormat("png", { compressionLevel: 9 })
+        .toFile(`${OUTPUT_FRAMES_DIR}/raw/${prefix}/${prefix}_${i}.png`)
+        .catch((e) => console.log(e));
+    })
+  );
 }
 
-async function work(manifests: Array<Manifest>, index: number) {
-  const { frames, data } = getAtributes(manifests);
-    const outputFramesDir = `${OUTPUT_FRAMES_DIR}/raw/${index}/`;
+async function work(manifest: NamedManifest, index: number) {
+  const { frames, data } = getAtributes(manifest);
+  const outputFramesDir = `${OUTPUT_FRAMES_DIR}/raw/${index}/`;
 
-    if (!fs.existsSync(outputFramesDir)) {
-      fs.mkdirSync(outputFramesDir, { recursive: true });
-    }
+  if (!fs.existsSync(outputFramesDir)) {
+    fs.mkdirSync(outputFramesDir, { recursive: true });
+  }
 
-    const outputMetadataDir = `${OUTPUT_METADATA_DIR}/raw/${index}/`;
+  const outputMetadataDir = `${OUTPUT_METADATA_DIR}/raw/${index}/`;
 
-    if (!fs.existsSync(outputMetadataDir)) {
-      fs.mkdirSync(outputMetadataDir, { recursive: true });
-    }
+  if (!fs.existsSync(outputMetadataDir)) {
+    fs.mkdirSync(outputMetadataDir, { recursive: true });
+  }
 
-    if (!fs.existsSync(`${OUTPUT_VIDEO_DIR}/raw/${index}`)) {
-      fs.mkdirSync(`${OUTPUT_VIDEO_DIR}/raw/${index}`, { recursive: true });
-    }
+  if (!fs.existsSync(`${OUTPUT_VIDEO_DIR}/raw/${index}`)) {
+    fs.mkdirSync(`${OUTPUT_VIDEO_DIR}/raw/${index}`, { recursive: true });
+  }
 
-    fs.writeFileSync(`${outputMetadataDir}/${index}.json`, JSON.stringify(data));
+  fs.writeFileSync(`${outputMetadataDir}/${index}.json`, JSON.stringify(data));
 
-    await combineAttributes(frames, index);
-    generateVideo(`${OUTPUT_FRAMES_DIR}/raw/${index}/${index}_%01d.png`, `${OUTPUT_VIDEO_DIR}/raw/${index}/${index}_output.webm`)
+  await combineAttributes(frames, index);
+  generateVideo(
+    `${OUTPUT_FRAMES_DIR}/raw/${index}/${index}_%01d.png`,
+    `${OUTPUT_VIDEO_DIR}/raw/${index}/${index}_output.webm`
+  );
 }
 
-export async function worker(start: number, stop: number, manifests: Array<Manifest>) {
+export async function worker(
+  start: number,
+  stop: number,
+  namedManifest: NamedManifest
+) {
   // const results = [];
-  for await (const result of asyncPool(2, Array.from(Array(stop).keys()), (index) => work(manifests, index))) {
+  for await (const result of asyncPool(
+    2,
+    Array.from(Array(stop).keys()),
+    (index) => work(namedManifest, index)
+  )) {
     // results.push(result);
   }
 }
