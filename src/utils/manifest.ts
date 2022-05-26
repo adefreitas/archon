@@ -241,22 +241,16 @@ async function work(manifest: NamedManifest, index: number): Promise<void> {
     fs.mkdirSync(outputFramesDir, { recursive: true });
   }
 
-  const outputMetadataDir = `${OUTPUT_METADATA_DIR}/raw/${index}/`;
-
-  if (!fs.existsSync(outputMetadataDir)) {
-    fs.mkdirSync(outputMetadataDir, { recursive: true });
+  if (!fs.existsSync(`${OUTPUT_VIDEO_DIR}/${index}`)) {
+    fs.mkdirSync(`${OUTPUT_VIDEO_DIR}/${index}`, { recursive: true });
   }
 
-  if (!fs.existsSync(`${OUTPUT_VIDEO_DIR}/raw/${index}`)) {
-    fs.mkdirSync(`${OUTPUT_VIDEO_DIR}/raw/${index}`, { recursive: true });
-  }
-
-  fs.writeFileSync(`${outputMetadataDir}/${index}.json`, JSON.stringify(data));
+  fs.writeFileSync(`${OUTPUT_VIDEO_DIR}/${index}/${index}.json`, JSON.stringify(data, null, 4));
 
   return combineAttributes(frames, index).then(() =>
     generateVideo(
       `${OUTPUT_FRAMES_DIR}/raw/${index}/${index}_%01d.png`,
-      `${OUTPUT_VIDEO_DIR}/raw/${index}/${index}_output.webm`
+      `${OUTPUT_VIDEO_DIR}/${index}/${index}_output.webm`
     )
   );
 }
