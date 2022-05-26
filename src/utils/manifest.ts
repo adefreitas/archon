@@ -1,11 +1,6 @@
 import * as fs from "fs";
-import {
-  INPUT_MANIFEST_DIR,
-} from "../constants/directories";
-import {
-  NamedManifest,
-  Manifest,
-} from "../types";
+import { INPUT_MANIFEST_DIR } from "../constants/directories";
+import { NamedManifest, Manifest } from "../types";
 
 export function readManifest(): NamedManifest {
   const manifestPath = `${INPUT_MANIFEST_DIR}/manifest.json`;

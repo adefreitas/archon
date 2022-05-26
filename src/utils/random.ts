@@ -24,10 +24,12 @@ function pick(x: number, arr: Array<number>): number {
  * @param weights an array of relative weights for the items
  */
 export function weightedRandom<T>(items: Array<T>, weights: Array<number>): T {
-  if (!Array.isArray(items) ||
+  if (
+    !Array.isArray(items) ||
     !Array.isArray(weights) ||
-    !(items.length == weights.length)) {
-    throw new TypeError('Expected two equal length arrays');
+    !(items.length == weights.length)
+  ) {
+    throw new TypeError("Expected two equal length arrays");
   }
   const cumulative = cumulativeWeights(weights);
   const rand = Math.random() * cumulative[cumulative.length - 1];

@@ -1,4 +1,3 @@
-
 import { readManifest } from "./utils/manifest";
 import { worker } from "./worker";
 

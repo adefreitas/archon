@@ -5,7 +5,13 @@ import {
   INPUT_DIR,
   OUTPUT_FRAMES_DIR,
 } from "../constants/directories";
-import { Attribute, AttributeFrames, AttributeManifest, Frames, NamedManifest } from "../types";
+import {
+  Attribute,
+  AttributeFrames,
+  AttributeManifest,
+  Frames,
+  NamedManifest,
+} from "../types";
 import { getRandomCategories } from "./categories";
 import { getFiles, getFilesInCategory } from "./files";
 
@@ -101,7 +107,6 @@ export function getAtributes(namedManifest: NamedManifest): {
     data,
   };
 }
-
 
 async function extractFrame(
   attribute: string,

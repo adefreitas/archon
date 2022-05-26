@@ -1,7 +1,5 @@
 import ffmpeg from "fluent-ffmpeg";
-import {
-  INPUT_AUDIO_DIR,
-} from "../constants/directories";
+import { INPUT_AUDIO_DIR } from "../constants/directories";
 
 export async function generateVideo(
   index: number,
