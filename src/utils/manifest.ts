@@ -14,13 +14,13 @@ import { generateVideo } from "../generators/video";
 import { chance, weightedRandom } from "./random";
 
 export enum Attribute {
-  HANDS = "Hands",
-  AURA = "Aura",
-  WATCHERS = "Watchers",
-  STAIRS = "Stairs",
-  ARCHES = "Arches",
-  GEMS = "Gems",
-  BLIPS = "Blips",
+  HANDS = "hands",
+  AURA = "aura",
+  WATCHERS = "watchers",
+  STAIRS = "stairs",
+  ARCHES = "arches",
+  GEMS = "gems",
+  BLIPS = "blips",
 }
 
 export type Manifest = Array<AttributeManifest>;
@@ -47,14 +47,8 @@ export interface File {
 
 export type AttributeFrames = Array<Array<string>>;
 
-export interface Frames {
-  aura: AttributeFrames;
-  watchers: AttributeFrames;
-  stairs: AttributeFrames;
-  arches: AttributeFrames;
-  gems: AttributeFrames;
-  blips: AttributeFrames;
-  hands: AttributeFrames;
+export type Frames = {
+  [key in Attribute]: AttributeFrames;
 }
 
 export function readManifest(): NamedManifest {
@@ -66,7 +60,7 @@ export function readManifest(): NamedManifest {
   const namedManifest: NamedManifest = {};
 
   for (let i = 0; i < manifest.length; i++) {
-    namedManifest[manifest[i].attribute] = manifest[i];
+    namedManifest[manifest[i].attribute.toLowerCase()] = manifest[i];
   }
   return namedManifest;
 }
@@ -206,7 +200,6 @@ export async function combineAttributesForFrame(
   prefix: number,
   frameNumber: number
 ) {
-  const attributes = Object.keys(frames);
   const promises = Object.values(Attribute).flatMap((attribute) => {
     const attributeFrames: AttributeFrames = frames[attribute.toLowerCase()];
     return attributeFrames.flatMap((frame) =>
@@ -226,11 +219,13 @@ export async function combineAttributesForFrame(
 }
 
 export async function combineAttributes(frames: Frames, prefix: number) {
+  console.log(`Generating frames for asset ${prefix}`);
   await Promise.all(
     Array.from(Array(200).keys()).map(async (i) => 
       combineAttributesForFrame(frames, prefix, i)
     )
   );
+  console.log(`Finished generating frames for asset ${prefix}`);
 }
 
 async function work(manifest: NamedManifest, index: number): Promise<void> {
@@ -249,6 +244,7 @@ async function work(manifest: NamedManifest, index: number): Promise<void> {
 
   return combineAttributes(frames, index).then(() =>
     generateVideo(
+      index,
       `${OUTPUT_FRAMES_DIR}/raw/${index}/${index}_%01d.png`,
       `${OUTPUT_VIDEO_DIR}/${index}/${index}_output.webm`
     )
