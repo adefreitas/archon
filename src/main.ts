@@ -1,5 +1,6 @@
 
-import { readManifest, worker } from "./utils/manifest";
+import { readManifest } from "./utils/manifest";
+import { worker } from "./worker";
 
 async function main() {
   console.log("Hello there! Starting processing");
