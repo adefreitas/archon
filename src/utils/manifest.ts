@@ -14,20 +14,20 @@ import { generateVideo } from "../generators/video";
 import { chance, weightedRandom } from "./random";
 
 export enum Attribute {
-  HANDS = 'Hands',
-  AURA="Aura",  
-  WATCHERS="Watchers",
-  STAIRS="Stairs",
-  ARCHES="Arches",
-  GEMS="Gems",
-  BLIPS="Blips",
+  HANDS = "Hands",
+  AURA = "Aura",
+  WATCHERS = "Watchers",
+  STAIRS = "Stairs",
+  ARCHES = "Arches",
+  GEMS = "Gems",
+  BLIPS = "Blips",
 }
 
 export type Manifest = Array<AttributeManifest>;
 
 export type NamedManifest = {
   [key in Attribute]?: AttributeManifest;
-}
+};
 
 export interface AttributeManifest {
   attribute: Attribute;
@@ -63,21 +63,23 @@ export function readManifest(): NamedManifest {
     fs.readFileSync(manifestPath).toString()
   ) as Manifest;
 
-  const namedManifest: NamedManifest = {}
+  const namedManifest: NamedManifest = {};
 
-  for(let i = 0; i < manifest.length; i++) {
+  for (let i = 0; i < manifest.length; i++) {
     namedManifest[manifest[i].attribute] = manifest[i];
   }
   return namedManifest;
 }
 
-export function getRandomCategories(manifest: AttributeManifest): Array<Category> {
+export function getRandomCategories(
+  manifest: AttributeManifest
+): Array<Category> {
   return [
     weightedRandom(
       manifest.categories,
       manifest.categories.map((category) => category.rarity)
     ),
-  ];;
+  ];
 }
 
 export function getFilesInCategory(category: Category) {
@@ -138,55 +140,41 @@ function getAtributes(namedManifest: NamedManifest): {
 } {
   let data = {};
 
-  const [aura, d1] = get(
-    namedManifest[Attribute.AURA]
-  );
+  const [aura, d1] = get(namedManifest[Attribute.AURA]);
   data = {
     ...data,
     ...d1,
   };
 
-  const [watchers, d2] = get(
-    namedManifest[Attribute.WATCHERS]
-  );
+  const [watchers, d2] = get(namedManifest[Attribute.WATCHERS]);
   data = {
     ...data,
     ...d2,
   };
-  const [stairs, d3] = get(
-    namedManifest[Attribute.STAIRS]
-  );
+  const [stairs, d3] = get(namedManifest[Attribute.STAIRS]);
   data = {
     ...data,
     ...d3,
   };
 
-  const [arches, d4] = get(
-    namedManifest[Attribute.ARCHES]
-  );
+  const [arches, d4] = get(namedManifest[Attribute.ARCHES]);
   data = {
     ...data,
     ...d4,
   };
 
-  const [gems, d5] = get(
-    namedManifest[Attribute.GEMS]
-  );
+  const [gems, d5] = get(namedManifest[Attribute.GEMS]);
   data = {
     ...data,
     ...d5,
   };
-  const [blips, d6] = get(
-    namedManifest[Attribute.BLIPS]
-  );
+  const [blips, d6] = get(namedManifest[Attribute.BLIPS]);
   data = {
     ...data,
     ...d6,
   };
 
-  const [hands, d7] = get(
-    namedManifest[Attribute.HANDS]
-  );
+  const [hands, d7] = get(namedManifest[Attribute.HANDS]);
   data = {
     ...data,
     ...d7,
@@ -199,39 +187,48 @@ function getAtributes(namedManifest: NamedManifest): {
 }
 
 async function extractFrame(
+  attribute: string,
   frameConfig: Array<string>,
-  frameNumber: number,
-  inputs: Array<Buffer>
-) {
-  if (frameConfig[frameNumber]) {
-    const path = await fs.promises.readFile(frameConfig[frameNumber]);
-    inputs.push(path);
-    return Promise.resolve();
+  frameNumber: number
+): Promise<Buffer> {
+  if (frameConfig[frameNumber] == null) {
+    return Promise.reject();
   }
-  return Promise.resolve();
+  return fs.promises.readFile(frameConfig[frameNumber]);
+}
+
+const isBuffer = (value: any): value is Buffer => {
+  return Buffer.isBuffer(value);
+};
+
+export async function combineAttributesForFrame(
+  frames: Frames,
+  prefix: number,
+  frameNumber: number
+) {
+  const attributes = Object.keys(frames);
+  const promises = Object.values(Attribute).flatMap((attribute) => {
+    const attributeFrames: AttributeFrames = frames[attribute.toLowerCase()];
+    return attributeFrames.flatMap((frame) =>
+      extractFrame(attribute, frame, frameNumber)
+    );
+  });
+
+  const buffers = await Promise.all(
+    promises.map((p) => p.catch((e) => Symbol("failed")))
+  ).then((values) => values.filter(isBuffer));
+
+  await sharp(`${INPUT_DIR}/background.png`)
+    .composite(buffers.map((input) => ({ input })))
+    .toFormat("png", { compressionLevel: 9 })
+    .toFile(`${OUTPUT_FRAMES_DIR}/raw/${prefix}/${prefix}_${frameNumber}.png`)
+    .catch((e) => console.log(e));
 }
 
 export async function combineAttributes(frames: Frames, prefix: number) {
   await Promise.all(
     Array.from(Array(200).keys()).map(async (i) => {
-      const inputs: Array<Buffer> = [];
-
-      const attributes = Object.keys(frames);
-      const promises = attributes.flatMap((attribute) => {
-        const attributeFrames: AttributeFrames = frames[attribute];
-        const frameExtractionPromise = attributeFrames.map((frame) => {
-          return extractFrame(frame, i, inputs);
-        });
-        return frameExtractionPromise;
-      });
-
-      await Promise.all(promises);
-
-      await sharp(`${INPUT_DIR}/background.png`)
-        .composite(inputs.map((input) => ({ input })))
-        .toFormat("png", { compressionLevel: 9 })
-        .toFile(`${OUTPUT_FRAMES_DIR}/raw/${prefix}/${prefix}_${i}.png`)
-        .catch((e) => console.log(e));
+      combineAttributesForFrame(frames, prefix, i);
     })
   );
 }
