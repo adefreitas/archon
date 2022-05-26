@@ -19,18 +19,32 @@ export interface AttributeManifest {
   categories: Array<Category>;
 }
 
+export type AssetConfigGeneratorSettings = {
+  [key in Attribute]?: AssetConfigGeneratorSetting;
+};
+
+export interface AssetConfigGeneratorSetting {
+  categories: Array<CategoryConfig>;
+}
+
+export interface CategoryConfig {
+  name: string;
+  rarity: number;
+  starting: number;
+  ending: number;
+  total: number;
+}
+
+export type AssetConfigGeneratorCounters = {
+  [key in Attribute]?: number;
+};
+
 export interface Category {
-  category: string;
-  rarity: number;
-  files: Array<File>;
-}
-
-export interface File {
-  file: string;
+  name: string;
   rarity: number;
 }
 
-export type AttributeFrames = Array<Array<string>>;
+export type AttributeFrames = Array<string>;
 
 export type Frames = {
   [key in Attribute]: AttributeFrames;

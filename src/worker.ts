@@ -2,11 +2,14 @@ import asyncPool from "tiny-async-pool";
 import * as fs from "fs";
 import { OUTPUT_FRAMES_DIR, OUTPUT_VIDEO_DIR } from "./constants/directories";
 import { generateVideo } from "./utils/video";
-import { NamedManifest } from "./types";
-import { combineAttributes, getAtributes } from "./utils/frames";
+import { combineAttributes } from "./utils/frames";
+import { AssetConfigGenerator } from "./generators/asset-config";
 
-async function work(manifest: NamedManifest, index: number): Promise<void> {
-  const { frames, data } = getAtributes(manifest);
+async function work(
+  generator: AssetConfigGenerator,
+  index: number
+): Promise<void> {
+  const { frames, data } = generator.generate();
   const outputFramesDir = `${OUTPUT_FRAMES_DIR}/raw/${index}/`;
 
   if (!fs.existsSync(outputFramesDir)) {
@@ -34,12 +37,25 @@ async function work(manifest: NamedManifest, index: number): Promise<void> {
 export async function worker(
   start: number,
   stop: number,
-  namedManifest: NamedManifest
+  generator: AssetConfigGenerator
 ) {
+  const startTime = new Date();
+  console.log(`Starting generation of assets at ${startTime}`);
   for await (const result of asyncPool(
-    2,
+    4,
     Array.from(Array(stop).keys()),
-    (index) => work(namedManifest, index)
+    (index) => work(generator, index)
   )) {
   }
+  const endTime = new Date();
+
+  let seconds = Math.floor((endTime.valueOf() - (startTime.valueOf()))/1000);
+  let minutes = Math.floor(seconds/60);
+  let hours = Math.floor(minutes/60);
+  let days = Math.floor(hours/24);
+  
+  hours = hours-(days*24);
+  minutes = minutes-(days*24*60)-(hours*60);
+  seconds = seconds-(days*24*60*60)-(hours*60*60)-(minutes*60);
+  console.log(`Finished generation of assets at ${endTime}. Took ${days} days ${hours} hours ${minutes} minutes ${seconds} seconds`)
 }

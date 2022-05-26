@@ -11,47 +11,22 @@ import {
   AttributeManifest,
   Frames,
   NamedManifest,
+  Category,
 } from "../types";
-import { getRandomCategories } from "./categories";
-import { getFiles, getFilesInCategory } from "./files";
+import { getRandomCategoryForAttribute } from "./categories";
+import { getFiles } from "./files";
 
-export async function generateFrames() {
-  console.log("Frame generation started 🏎");
-  const backgroundPath = `./${INPUT_ATTRIBUTES_DIR}/background.png`;
-
-  for (let i = 1; i < 5; i++) {
-    const leftImagePath = `./${INPUT_ATTRIBUTES_DIR}/left${i}.png`;
-    const rightImagePath = `./${INPUT_ATTRIBUTES_DIR}/right${i}.png`;
-    const outputFramePath = `./${OUTPUT_FRAMES_DIR}/output${i}.png`;
-
-    const leftImage = fs.readFileSync(leftImagePath);
-    const rightImage = fs.readFileSync(rightImagePath);
-
-    await sharp(backgroundPath)
-      .composite([{ input: leftImage }, { input: rightImage }])
-      .toFile(outputFramePath);
-  }
-  console.log("Frame generation finished 🏁!");
+export function extractData(fileNameList: Array<string>, categoryName: string) {
+  const data = {};
+  data[categoryName] = fileNameList;
+  return data;
 }
 
-export function get(manifest: AttributeManifest): [Array<Array<string>>, {}] {
-  const categories = getRandomCategories(manifest);
-  const fileList = categories.map((category) => getFilesInCategory(category));
-  const files = fileList
-    .map((file) => {
-      return file.map((f) => {
-        return getFiles(manifest.attribute, categories[0].category, f.file);
-      });
-    })
-    .flat();
+export function get(manifest: AttributeManifest): [Array<string>, {}] {
+  const category = getRandomCategoryForAttribute(manifest);
+  const files = getFiles(manifest.attribute, category.name);
 
-  const data = {};
-  const filesWithActualFiles = fileList.filter((file) => file.length > 0);
-  for (let i = 0; i < filesWithActualFiles.length; i++) {
-    const name = filesWithActualFiles[i][0].file;
-    const values = filesWithActualFiles[i].map((file) => file.file);
-    data[categories[0].category] = values;
-  }
+  const data = extractData(files, category.name);
 
   return [files, data];
 }
@@ -109,7 +84,6 @@ export function getAtributes(namedManifest: NamedManifest): {
 }
 
 async function extractFrame(
-  attribute: string,
   frameConfig: Array<string>,
   frameNumber: number
 ): Promise<Buffer> {
@@ -130,13 +104,11 @@ export async function combineAttributesForFrame(
 ) {
   const promises = Object.values(Attribute).flatMap((attribute) => {
     const attributeFrames: AttributeFrames = frames[attribute.toLowerCase()];
-    return attributeFrames.flatMap((frame) =>
-      extractFrame(attribute, frame, frameNumber)
-    );
+    return extractFrame(attributeFrames, frameNumber);
   });
 
   const buffers = await Promise.all(
-    promises.map((p) => p.catch((e) => Symbol("failed")))
+    promises.map((p) => p.catch(() => Symbol("failed")))
   ).then((values) => values.filter(isBuffer));
 
   await sharp(`${INPUT_DIR}/background.png`)

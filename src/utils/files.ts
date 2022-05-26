@@ -1,30 +1,27 @@
 import { INPUT_ATTRIBUTES_DIR } from "../constants/directories";
-import { Category } from "../types";
+import { AttributeManifest, Category } from "../types";
 import { chance, weightedRandom } from "./random";
 
-export function getFilesInCategory(category: Category) {
-  if (!chance(category.rarity)) {
-    return [];
-  }
-  return [
-    weightedRandom(
-      category.files,
-      category.files.map((file) => file.rarity)
-    ),
-  ];
+export function getRandomCategoryInAttribute(
+  attributeManifest: AttributeManifest
+) {
+  return weightedRandom(
+    attributeManifest.categories,
+    attributeManifest.categories.map((category) => category.rarity)
+  );
 }
 
-export function getFiles(
-  attribute: string,
-  category: string,
-  file: string
-): Array<string> {
-  const images: Array<string> = [];
+function capitalizeFirstLetter(word: string) {
+  return word[0].toUpperCase() + word.slice(1);
+}
 
+export function getFiles(attribute: string, category: string): Array<string> {
+  const images: Array<string> = [];
+  const capitalizedAttributeName = capitalizeFirstLetter(attribute);
   for (let i = 1; i < 200; i++) {
     // Generate file paths
     images.push(
-      `${INPUT_ATTRIBUTES_DIR}/${category}/${file}/${file}_${i
+      `${INPUT_ATTRIBUTES_DIR}/${capitalizedAttributeName}/${category}/${category}_${i
         .toString()
         .padStart(5, "0")}.png`
     );
