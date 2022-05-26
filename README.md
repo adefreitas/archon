@@ -16,7 +16,7 @@ Composes frames from a group of given images, and generates a video out of them
 ## Run
 
 ```
-npm run start
+npm start
 ```
 
 ## License

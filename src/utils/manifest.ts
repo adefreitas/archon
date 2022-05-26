@@ -227,13 +227,13 @@ export async function combineAttributesForFrame(
 
 export async function combineAttributes(frames: Frames, prefix: number) {
   await Promise.all(
-    Array.from(Array(200).keys()).map(async (i) => {
-      combineAttributesForFrame(frames, prefix, i);
-    })
+    Array.from(Array(200).keys()).map(async (i) => 
+      combineAttributesForFrame(frames, prefix, i)
+    )
   );
 }
 
-async function work(manifest: NamedManifest, index: number) {
+async function work(manifest: NamedManifest, index: number): Promise<void> {
   const { frames, data } = getAtributes(manifest);
   const outputFramesDir = `${OUTPUT_FRAMES_DIR}/raw/${index}/`;
 
@@ -253,10 +253,11 @@ async function work(manifest: NamedManifest, index: number) {
 
   fs.writeFileSync(`${outputMetadataDir}/${index}.json`, JSON.stringify(data));
 
-  await combineAttributes(frames, index);
-  generateVideo(
-    `${OUTPUT_FRAMES_DIR}/raw/${index}/${index}_%01d.png`,
-    `${OUTPUT_VIDEO_DIR}/raw/${index}/${index}_output.webm`
+  return combineAttributes(frames, index).then(() =>
+    generateVideo(
+      `${OUTPUT_FRAMES_DIR}/raw/${index}/${index}_%01d.png`,
+      `${OUTPUT_VIDEO_DIR}/raw/${index}/${index}_output.webm`
+    )
   );
 }
 
