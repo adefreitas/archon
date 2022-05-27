@@ -5,6 +5,7 @@ import {
   Frames,
   NamedManifest,
   CategoryConfig,
+  AttributeManifest,
 } from "../types";
 import { getFiles } from "../utils/files";
 
@@ -24,16 +25,39 @@ export class AssetConfigGenerator {
     const keys = Object.keys(namedManifest);
     this.attributes = keys as Array<Attribute>;
 
-    for (let i = 0; i < keys.length; i++) {
-      let counter = 0;
-      const key: Attribute = namedManifest[keys[i]].attribute.toLowerCase();
-      const rarities = namedManifest[key].categories.map(
-        (category) => category.rarity
-      );
-      const totalRarities = rarities.reduce((prev, current) => prev + current);
-      const categorySettings: Array<CategoryConfig> = namedManifest[
-        key
-      ].categories.map((category) => {
+    initialiseCountersAndSettings();
+
+    function initialiseCountersAndSettings() {
+      for (let i = 0; i < keys.length; i++) {
+        let counter = 0;
+        const key: Attribute = namedManifest[keys[i]].attribute.toLowerCase();
+        const rarities = namedManifest[key].categories.map(
+          (category) => category.rarity
+        );
+        const totalRarities = rarities.reduce(
+          (prev, current) => prev + current
+        );
+        const categorySettings: Array<CategoryConfig> = getCategorySettings(
+          namedManifest[key],
+          totalRarities,
+          counter
+        );
+
+        this.settings[key] = {
+          categories: categorySettings,
+        };
+
+        this.counters[key] = 0;
+        counter++;
+      }
+    }
+
+    function getCategorySettings(
+      attribute: AttributeManifest,
+      totalRarities: number,
+      counter: number
+    ): CategoryConfig[] {
+      return attribute.categories.map((category) => {
         const total = Math.ceil(
           (category.rarity / totalRarities) * this.maxAmount
         );
@@ -45,26 +69,25 @@ export class AssetConfigGenerator {
           rarity: category.rarity,
         };
       });
-
-      this.settings[key] = {
-        categories: categorySettings,
-      };
-      this.counters[key] = 0;
-      counter++;
     }
     // console.log({ settings: JSON.stringify(this.settings) });
   }
 
   private updateCounters(attributeIndex: number = 0) {
+    const isAttributeIndexExceeded = attributeIndex >= this.attributes.length;
+    const isAttributeCounterInAcceptableRange =
+      this.counters[this.attributes[attributeIndex]] < this.maxAmount;
     console.log(
       `updating counters for attribute ${
         this.attributes[attributeIndex]
       } current value ${this.counters[this.attributes[attributeIndex]]}`
     );
-    if (attributeIndex >= this.attributes.length) {
+
+    if (isAttributeIndexExceeded) {
       return;
     }
-    if (this.counters[this.attributes[attributeIndex]] < this.maxAmount) {
+
+    if (isAttributeCounterInAcceptableRange) {
       console.log(
         `updating attribute counter ${this.attributes[attributeIndex]} from ${
           this.counters[this.attributes[attributeIndex]]
@@ -77,14 +100,19 @@ export class AssetConfigGenerator {
       this.updateCounters(attributeIndex + 1);
     }
     // Does it need to be restarted at any point?
-    if (
-      Object.values(this.counters).filter(
-        (counter) => counter === this.maxAmount
-      ).length === this.attributes.length
-    ) {
-      console.log("max ammount reached, restarting");
-      for (let i = 0; i < this.attributes.length; i++) {
-        this.counters[i] = 0;
+    restartCountersIfNeeded();
+
+    function restartCountersIfNeeded() {
+      const haveAllCountersReachedTheirMaximum =
+        Object.values(this.counters).filter(
+          (counter) => counter === this.maxAmount
+        ).length === this.attributes.length;
+
+      if (haveAllCountersReachedTheirMaximum) {
+        console.log("max ammount reached, restarting");
+        for (let i = 0; i < this.attributes.length; i++) {
+          this.counters[i] = 0;
+        }
       }
     }
   }
@@ -96,6 +124,7 @@ export class AssetConfigGenerator {
         this.counters[attribute] <= category.ending
       );
     });
+
     return {
       name: category.name,
       files: getFiles(attribute, category.name),
