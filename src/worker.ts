@@ -28,8 +28,6 @@ async function work(
   return combineAttributes(frames, index).then(() =>
     generateVideo(
       index,
-      `${OUTPUT_FRAMES_DIR}/raw/${index}/${index}_%01d.png`,
-      `${OUTPUT_VIDEO_DIR}/${index}/${index}_output.webm`
     )
   );
 }

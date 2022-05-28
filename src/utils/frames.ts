@@ -37,7 +37,7 @@ export function getAtributes(namedManifest: NamedManifest): {
 } {
   let data = {};
 
-  const [aura, d1] = get(namedManifest[Attribute.AURA]);
+  const [auras, d1] = get(namedManifest[Attribute.AURAS]);
   data = {
     ...data,
     ...d1,
@@ -71,26 +71,70 @@ export function getAtributes(namedManifest: NamedManifest): {
     ...d6,
   };
 
-  const [hands, d7] = get(namedManifest[Attribute.HANDS]);
+  const [handTopLeft, d7] = get(namedManifest[Attribute.HAND_TOP_LEFT]);
   data = {
     ...data,
     ...d7,
   };
 
+  const [handTopRight, d8] = get(namedManifest[Attribute.HAND_TOP_RIGHT]);
+  data = {
+    ...data,
+    ...d8,
+  };
+
+  const [handBottomLeft, d9] = get(namedManifest[Attribute.HAND_BOTTOM_LEFT]);
+  data = {
+    ...data,
+    ...d9,
+  };
+
+  const [handBottomRight, d10] = get(namedManifest[Attribute.HAND_BOTTOM_RIGHT]);
+  data = {
+    ...data,
+    ...d10,
+  };
+
+  const [blipAura, d11] = get(namedManifest[Attribute.BLIP_AURA]);
+  data = {
+    ...data,
+    ...d11,
+  };
+
+  const [elements, d12] = get(namedManifest[Attribute.ELEMENTS]);
+  data = {
+    ...data,
+    ...d12,
+  };
+
+  const frames: Frames = {
+    "00_Auras": auras,
+    "01_Watchers": watchers,
+    "03_Stairs": stairs,
+    "07_Arches": arches,
+    "02_Gems": gems,
+    "05_Blips": blips,
+    "07_Hand_Top_Left": handTopLeft,
+    "08_Hand_Top_Right": handTopRight,
+    "09_Hand_Bottom_Left": handBottomLeft,
+    "10_Hand_Bottom_Right": handBottomRight,
+    "06_Blip_Aura": blipAura,
+    "11_Elements": elements
+  }
+
   return {
-    frames: { aura, watchers, stairs, arches, gems, blips, hands },
+    frames,
     data,
   };
 }
 
 async function extractFrame(
-  frameConfig: Array<string>,
-  frameNumber: number
+  framePath: string,
 ): Promise<Buffer> {
-  if (frameConfig[frameNumber] == null) {
+  if (framePath == null) {
     return Promise.reject();
   }
-  return fs.promises.readFile(frameConfig[frameNumber]);
+  return fs.promises.readFile(framePath);
 }
 
 const isBuffer = (value: any): value is Buffer => {
@@ -103,8 +147,8 @@ export async function combineAttributesForFrame(
   frameNumber: number
 ) {
   const promises = Object.values(Attribute).flatMap((attribute) => {
-    const attributeFrames: AttributeFrames = frames[attribute.toLowerCase()];
-    return extractFrame(attributeFrames, frameNumber);
+    const attributeFrames: AttributeFrames = frames[attribute];
+    return extractFrame(attributeFrames[frameNumber]);
   });
 
   const buffers = await Promise.all(

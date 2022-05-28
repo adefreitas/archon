@@ -1,10 +1,8 @@
 import ffmpeg from "fluent-ffmpeg";
-import { INPUT_AUDIO_DIR } from "../constants/directories";
+import { INPUT_AUDIO_DIR, OUTPUT_FRAMES_DIR, OUTPUT_VIDEO_DIR } from "../constants/directories";
 
 export async function generateVideo(
   index: number,
-  input: string,
-  output: string
 ) {
   console.log(`Video generation started for asset number ${index} 🏎`);
   return new Promise<void>((resolve) => {
@@ -14,9 +12,9 @@ export async function generateVideo(
     };
 
     ffmpeg()
-      .input(input)
+      .input(`${OUTPUT_FRAMES_DIR}/raw/${index}/${index}_%01d.png`)
       .input(`${INPUT_AUDIO_DIR}/bliptunes.mp3`)
       .on("end", handleVideoGenerationFinished)
-      .save(output);
+      .save(`${OUTPUT_VIDEO_DIR}/${index}/${index}_output.webm`);
   });
 }

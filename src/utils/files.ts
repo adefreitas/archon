@@ -17,11 +17,12 @@ function capitalizeFirstLetter(word: string) {
 
 export function getFiles(attribute: string, category: string): Array<string> {
   const images: Array<string> = [];
-  const capitalizedAttributeName = capitalizeFirstLetter(attribute);
+  // const capitalizedAttributeName = capitalizeFirstLetter(attribute);
+
   for (let i = 1; i < 200; i++) {
     // Generate file paths
     images.push(
-      `${INPUT_ATTRIBUTES_DIR}/${capitalizedAttributeName}/${category}/${category}_${i
+      `${INPUT_ATTRIBUTES_DIR}/${attribute}/${category}/${category}_${i
         .toString()
         .padStart(5, "0")}.png`
     );

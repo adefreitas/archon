@@ -1,11 +1,16 @@
 export enum Attribute {
-  HANDS = "hands",
-  AURA = "aura",
-  WATCHERS = "watchers",
-  STAIRS = "stairs",
-  ARCHES = "arches",
-  GEMS = "gems",
-  BLIPS = "blips",
+  AURAS                           = "00_Auras",
+	WATCHERS                        = "01_Watchers",
+	GEMS                            = "02_Gems",
+	STAIRS                          = "03_Stairs",
+	BLIPS                           = "05_Blips",
+	BLIP_AURA                       = "06_Blip_Aura",
+	ARCHES                          = "07_Arches",
+	HAND_TOP_LEFT                   = "07_Hand_Top_Left",
+	HAND_TOP_RIGHT                  = "08_Hand_Top_Right",
+	HAND_BOTTOM_LEFT                = "09_Hand_Bottom_Left",
+	HAND_BOTTOM_RIGHT               = "10_Hand_Bottom_Right",
+	ELEMENTS                        = "11_Elements"
 }
 
 export type Manifest = Array<AttributeManifest>;

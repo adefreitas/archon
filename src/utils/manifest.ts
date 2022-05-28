@@ -11,7 +11,7 @@ export function readManifest(): NamedManifest {
   const namedManifest: NamedManifest = {};
 
   for (let i = 0; i < manifest.length; i++) {
-    namedManifest[manifest[i].attribute.toLowerCase()] = manifest[i];
+    namedManifest[manifest[i].attribute] = manifest[i];
   }
   return namedManifest;
 }
