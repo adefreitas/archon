@@ -3,6 +3,7 @@ import { INPUT_AUDIO_DIR, OUTPUT_FRAMES_DIR, OUTPUT_VIDEO_DIR } from "../constan
 
 export async function generateVideo(
   index: number,
+  audioPath = `${INPUT_AUDIO_DIR}/bliptunes.mp3`
 ) {
   console.log(`Video generation started for asset number ${index} 🏎`);
   return new Promise<void>((resolve) => {
@@ -13,7 +14,8 @@ export async function generateVideo(
 
     ffmpeg()
       .input(`${OUTPUT_FRAMES_DIR}/raw/${index}/${index}_%01d.png`)
-      .input(`${INPUT_AUDIO_DIR}/bliptunes.mp3`)
+      .input(audioPath)
+      .on("error", (e) => console.log("Error generating video", e))
       .on("end", handleVideoGenerationFinished)
       .save(`${OUTPUT_VIDEO_DIR}/${index}/${index}_output.webm`);
   });

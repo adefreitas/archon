@@ -8,7 +8,7 @@ import {
   AttributeManifest,
   Category,
 } from "../types";
-import { getFiles } from "../utils/files";
+import { getAudioFile, getFiles } from "../utils/files";
 
 export class AssetConfigGenerator {
   settings: AssetConfigGeneratorSettings;
@@ -70,18 +70,22 @@ export class AssetConfigGenerator {
   }
 
   private updateCounters() {
-    this.counters["00_Auras"]++;
-    this.counters["01_Watchers"]++;
-    this.counters["02_Gems"]++;
-    this.counters["03_Stairs"]++;
-    this.counters["05_Blips"]++;
-    this.counters["06_Blip_Aura"]++;
-    this.counters["07_Arches"]++;
-    this.counters["07_Hand_Top_Left"]++;
-    this.counters["08_Hand_Top_Right"]++;
-    this.counters["09_Hand_Bottom_Left"]++;
-    this.counters["10_Hand_Bottom_Right"]++;
-    this.counters["11_Elements"];
+    Object.keys(this.counters).forEach((key) =>
+      this.counters[key]++
+    );
+    // this.counters["00_Auras"]++;
+    // this.counters["01_Watchers"]++;
+    // this.counters["02_Gems"]++;
+    // this.counters["03_Stairs"]++;
+    // this.counters["05_Blips"]++;
+    // this.counters["06_Blip_Aura"]++;
+    // this.counters["07_Arches"]++;
+    // this.counters["07_Hand_Top_Left"]++;
+    // this.counters["08_Hand_Top_Right"]++;
+    // this.counters["09_Hand_Bottom_Left"]++;
+    // this.counters["10_Hand_Bottom_Right"]++;
+    // this.counters["11_Elements"]++;
+    // this.counters["12_Music"]++;
     
 
     const restartCountersIfNeeded = () => {
@@ -109,9 +113,12 @@ export class AssetConfigGenerator {
       );
     });
 
+    const type = this.namedManifest[attribute].type;
+
     return {
       name: category.name,
-      files: getFiles(attribute, category.name),
+      type,
+      files: type === 'audio' ? getAudioFile(attribute, category.name) : getFiles(attribute, category.name),
       rarity: category.rarity,
     };
   }
@@ -119,22 +126,25 @@ export class AssetConfigGenerator {
   public generate(): {
     frames: Frames;
     data: any;
+    audioPath: string
   } {
     const data = {};
-    const frames: { [key in Attribute]: Array<string> } = {
-      "07_Hand_Top_Left": [],
-      "08_Hand_Top_Right": [],
-      "10_Hand_Bottom_Right": [],
-      "09_Hand_Bottom_Left": [],
-      "11_Elements": [],
+    const frames: Frames = {
+      "00_Auras": [],
+      "01_Watchers": [],
+      "02_Gems": [],
+      "03_Stairs": [],
       "05_Blips": [],
       "06_Blip_Aura": [],
-      "01_Watchers": [],
-      "03_Stairs": [],
       "07_Arches": [],
-      "02_Gems": [],
-      "00_Auras": [],
+      "07_Hand_Top_Left": [],
+      "08_Hand_Top_Right": [],
+      "09_Hand_Bottom_Left": [],
+      "10_Hand_Bottom_Right": [],
+      "11_Elements": [],
     };
+
+    let audioPath: string = "";
 
     this.attributes.map((attribute) => {
       const result = this.findAttributeCategoryByCounter(attribute);
@@ -142,13 +152,18 @@ export class AssetConfigGenerator {
         name: result.name,
         rarity: result.rarity,
       };
-      frames[attribute] = result.files;
+      if (this.namedManifest[attribute].type === 'audio') {
+        audioPath = result.files[0]
+      } else {
+        frames[attribute] = result.files;
+      }
     });
 
     this.updateCounters();
     return {
       frames,
       data,
+      audioPath,
     };
   }
 }

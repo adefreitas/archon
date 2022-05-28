@@ -89,7 +89,9 @@ export function getAtributes(namedManifest: NamedManifest): {
     ...d9,
   };
 
-  const [handBottomRight, d10] = get(namedManifest[Attribute.HAND_BOTTOM_RIGHT]);
+  const [handBottomRight, d10] = get(
+    namedManifest[Attribute.HAND_BOTTOM_RIGHT]
+  );
   data = {
     ...data,
     ...d10,
@@ -110,17 +112,17 @@ export function getAtributes(namedManifest: NamedManifest): {
   const frames: Frames = {
     "00_Auras": auras,
     "01_Watchers": watchers,
-    "03_Stairs": stairs,
-    "07_Arches": arches,
     "02_Gems": gems,
+    "03_Stairs": stairs,
     "05_Blips": blips,
+    "06_Blip_Aura": blipAura,
+    "07_Arches": arches,
     "07_Hand_Top_Left": handTopLeft,
     "08_Hand_Top_Right": handTopRight,
     "09_Hand_Bottom_Left": handBottomLeft,
     "10_Hand_Bottom_Right": handBottomRight,
-    "06_Blip_Aura": blipAura,
-    "11_Elements": elements
-  }
+    "11_Elements": elements,
+  };
 
   return {
     frames,
@@ -128,9 +130,7 @@ export function getAtributes(namedManifest: NamedManifest): {
   };
 }
 
-async function extractFrame(
-  framePath: string,
-): Promise<Buffer> {
+async function extractFrame(framePath: string): Promise<Buffer> {
   if (framePath == null) {
     return Promise.reject();
   }
@@ -146,7 +146,7 @@ export async function combineAttributesForFrame(
   prefix: number,
   frameNumber: number
 ) {
-  const promises = Object.values(Attribute).flatMap((attribute) => {
+  const promises = Object.keys(frames).flatMap((attribute) => {
     const attributeFrames: AttributeFrames = frames[attribute];
     return extractFrame(attributeFrames[frameNumber]);
   });

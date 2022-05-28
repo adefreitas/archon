@@ -9,7 +9,7 @@ async function work(
   generator: AssetConfigGenerator,
   index: number
 ): Promise<void> {
-  const { frames, data } = generator.generate();
+  const { frames, audioPath, data } = generator.generate();
   const outputFramesDir = `${OUTPUT_FRAMES_DIR}/raw/${index}/`;
 
   if (!fs.existsSync(outputFramesDir)) {
@@ -28,6 +28,7 @@ async function work(
   return combineAttributes(frames, index).then(() =>
     generateVideo(
       index,
+      audioPath
     )
   );
 }

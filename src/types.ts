@@ -10,7 +10,8 @@ export enum Attribute {
 	HAND_TOP_RIGHT                  = "08_Hand_Top_Right",
 	HAND_BOTTOM_LEFT                = "09_Hand_Bottom_Left",
 	HAND_BOTTOM_RIGHT               = "10_Hand_Bottom_Right",
-	ELEMENTS                        = "11_Elements"
+	ELEMENTS                        = "11_Elements",
+  MUSIC                           = "12_Music"
 }
 
 export type Manifest = Array<AttributeManifest>;
@@ -22,6 +23,7 @@ export type NamedManifest = {
 export interface AttributeManifest {
   attribute: Attribute;
   categories: Array<Category>;
+  type: 'audio' | 'image'
 }
 
 export type AssetConfigGeneratorSettings = {
@@ -52,5 +54,5 @@ export interface Category {
 export type AttributeFrames = Array<string>;
 
 export type Frames = {
-  [key in Attribute]: AttributeFrames;
+  [key in Attribute]?: AttributeFrames;
 };

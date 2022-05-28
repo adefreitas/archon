@@ -29,3 +29,7 @@ export function getFiles(attribute: string, category: string): Array<string> {
   }
   return images;
 }
+
+export function getAudioFile(attribute: string, category: string): Array<string> {
+  return  [`${INPUT_ATTRIBUTES_DIR}/${attribute}/${category}/${category}.wav`];
+}
