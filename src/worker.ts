@@ -9,7 +9,7 @@ async function work(
   generator: AssetConfigGenerator,
   index: number
 ): Promise<void> {
-  const { frames, audioPath, data } = generator.generate();
+  const { frames, audioPath, data } = generator.generate(index);
   const outputFramesDir = `${OUTPUT_FRAMES_DIR}/raw/${index}/`;
 
   if (!fs.existsSync(outputFramesDir)) {

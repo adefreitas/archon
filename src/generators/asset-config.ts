@@ -1,18 +1,15 @@
 import {
-  AssetConfigGeneratorCounters,
   AssetConfigGeneratorSettings,
   Attribute,
   Frames,
   NamedManifest,
   CategoryConfig,
-  AttributeManifest,
   Category,
 } from "../types";
 import { getAudioFile, getFiles } from "../utils/files";
 
 export class AssetConfigGenerator {
   settings: AssetConfigGeneratorSettings;
-  counters: AssetConfigGeneratorCounters;
   namedManifest: NamedManifest;
   attributes: Array<Attribute>;
   maxAmount: number;
@@ -21,7 +18,6 @@ export class AssetConfigGenerator {
     this.maxAmount = maxAmount;
     this.namedManifest = namedManifest;
     this.settings = {};
-    this.counters = {};
 
     const keys = Object.keys(namedManifest);
     this.attributes = keys as Array<Attribute>;
@@ -50,7 +46,7 @@ export class AssetConfigGenerator {
     };
     // console.log({ settings: JSON.stringify(this.settings) });
 
-    const initialiseCountersAndSettings = () => {
+    const initialiseSettings = () => {
       for (let i = 0; i < keys.length; i++) {
         const key: Attribute = namedManifest[keys[i]].attribute;
 
@@ -61,55 +57,18 @@ export class AssetConfigGenerator {
         this.settings[key] = {
           categories: categorySettings,
         };
-
-        this.counters[key] = 0;
       }
     };
 
-    initialiseCountersAndSettings();
+    initialiseSettings();
   }
 
-  private updateCounters() {
-    Object.keys(this.counters).forEach((key) =>
-      this.counters[key]++
-    );
-    // this.counters["00_Auras"]++;
-    // this.counters["01_Watchers"]++;
-    // this.counters["02_Gems"]++;
-    // this.counters["03_Stairs"]++;
-    // this.counters["05_Blips"]++;
-    // this.counters["06_Blip_Aura"]++;
-    // this.counters["07_Arches"]++;
-    // this.counters["07_Hand_Top_Left"]++;
-    // this.counters["08_Hand_Top_Right"]++;
-    // this.counters["09_Hand_Bottom_Left"]++;
-    // this.counters["10_Hand_Bottom_Right"]++;
-    // this.counters["11_Elements"]++;
-    // this.counters["12_Music"]++;
-    
 
-    const restartCountersIfNeeded = () => {
-      const haveAllCountersReachedTheirMaximum =
-        Object.values(this.counters).filter(
-          (counter) => counter === this.maxAmount
-        ).length === this.attributes.length;
-
-      if (haveAllCountersReachedTheirMaximum) {
-        console.log("max ammount reached, restarting");
-        for (let i = 0; i < this.attributes.length; i++) {
-          this.counters[i] = 0;
-        }
-      }
-    }
-    // Does it need to be restarted at any point?
-    restartCountersIfNeeded();
-  }
-
-  private findAttributeCategoryByCounter(attribute: Attribute) {
+  private findAttributeCategoryByCounter(attribute: Attribute, counter: number) {
     const category = this.settings[attribute].categories.find((category) => {
       return (
-        this.counters[attribute] >= category.starting &&
-        this.counters[attribute] <= category.ending
+       counter >= category.starting &&
+       counter <= category.ending
       );
     });
 
@@ -123,7 +82,7 @@ export class AssetConfigGenerator {
     };
   }
 
-  public generate(): {
+  public generate(counter: number): {
     frames: Frames;
     data: any;
     audioPath: string
@@ -147,7 +106,7 @@ export class AssetConfigGenerator {
     let audioPath: string = "";
 
     this.attributes.map((attribute) => {
-      const result = this.findAttributeCategoryByCounter(attribute);
+      const result = this.findAttributeCategoryByCounter(attribute, counter);
       data[attribute] = {
         name: result.name,
         rarity: result.rarity,
@@ -159,7 +118,6 @@ export class AssetConfigGenerator {
       }
     });
 
-    this.updateCounters();
     return {
       frames,
       data,
