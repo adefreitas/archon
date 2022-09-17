@@ -8,9 +8,9 @@ async function main() {
   console.log("Hello there! Starting processing");
   await fs.rmSync(OUTPUT_DIR, { recursive: true, force: true });
   const manifest = readManifest();
-  const maxAmount = 6;
-  const generator = new AssetConfigGenerator(maxAmount, manifest);
-  await worker(0, maxAmount, generator);
+  const totalAmount = 1;
+  const generator = new AssetConfigGenerator(totalAmount, manifest);
+  await worker(0, totalAmount, generator);
 }
 
 main();
