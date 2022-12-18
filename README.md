@@ -19,9 +19,9 @@ Composes frames from a group of given images, and generates a video out of them
 npm start
 ```
 
-## License
+## Disclaimer
 
-Not for commercial use
+Not for commercial use of any kind. Reach out for enquiries about licensing.
 
 ## Name inspiration
 
